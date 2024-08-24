@@ -79,8 +79,12 @@ WSGI_APPLICATION = 'Homework.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'member', #資料庫名稱
+        'USER': 'root', #登入資料庫的帳號
+        'PASSWORD': 'P@ssw0rd', #登入資料庫帳號的密碼
+        'HOST':'localhost', #MySQL所在位置,localhost表示本機
+        'PORT':3306 #MySQL所在位置的Port號 
     }
 }
 
