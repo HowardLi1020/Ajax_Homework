@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+<h2>觀光景點</h2>
+<table id="travel" class="table table-bordered">
+    <thead>
+        <tr>
+            <th>景點</th>
+            <th>簡介</th>
+            <th>地址</th>
+            <th>照片</th>
+
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'scripts/travel.js' %}"></script>
+<script>
+    const eleTable = document.querySelector('#travel>tbody')
+    const data = spots.CommonFormat.Section
+    const eleEmps = data.map(emp => {
+        const {stitle, xbody, address, file} = emp
+        let imgHtml = ''
+            if (file && Array.isArray(file.img)) {
+                imgHtml = file.img.map(img => {
+                    const imgSrc = img.text
+                    const imgAlt = img['@description']
+                    return `
+                        <img src="${imgSrc}" alt="${imgAlt}" width="100" height="100">
+                    `
+                }).join(' ')
+            } else {
+                imgHtml = 'No images available'
+            }
+
+        return(
+            `
+            <tr>
+                <td>${stitle}</td>
+                <td>${xbody}</td>
+                <td>${address}</td>
+                <td>${imgHtml}</td>
+
+            </tr>
+            `
+        )
+    })
+    eleTable.innerHTML = eleEmps.join("")
+    
+</script>
+{% endblock %}
