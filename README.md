@@ -1,0 +1,2 @@
+#home的index是作業一
+#home的register是作業二和作業三
