@@ -1,48 +1,53 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 import time
-import json
+from .models import myMember
 from django.core.files.storage import FileSystemStorage
+from datetime import datetime
+
 # Create your views here.
-def index(reqeust):
+def index(request):
     time.sleep(5)
     content='Hello!'
-    # response = HttpResponse(content, 'text/plain')
-    # 回傳文字內容
     response = HttpResponse(content, content_type='text/plain; charset=utf-8')
     return response
 
-# /api/register/?name=Tom&email=Tom@company.com&age=30
 def register(request):
-#    接收GET傳過來的資料
-#    取得 ?id=3 的資料
-#    name = request.GET.get('name', 'Guest')
-#    email = request.GET.get('email', 'Guest@company.com')
-#    age = request.GET.get('age', 30)
-# 接收POST傳過來FormData的資料
-   name = request.POST.get('name', 'Guest')
-   email = request.POST.get('email', 'Guest@company.com')
-   age = request.POST.get('age', 30)
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        checkPassword = request.POST.get('checkPassword')
+        age = request.POST.get('age')
+        uploaded_file = request.FILES.get('avatar')
 
-#  接收傳過來的檔案
-   uploaded_file = request.FILES.get('avatar')
-#    把檔案寫進uploads資料夾
-   if uploaded_file:
-       fs = FileSystemStorage()
-       file_name = fs.save(uploaded_file.name, uploaded_file)
+        file_name = None
 
-   content = f"{name} 您好，電子郵件是 {email}，{age} 歲了. {file_name}"
+        if uploaded_file:
+            fs = FileSystemStorage()
+            file_name = fs.save(uploaded_file.name, uploaded_file)
 
-   return HttpResponse(content, 'text/plain')
+        if checkPassword != password:
+            content = '密碼不一致'
+            return HttpResponse(content, 'text/plain; charset=utf-8')
+        
+        myMember.objects.create(
+            user_name = name,
+            user_password = password, 
+            user_age = age,
+            user_email = email,
+            user_avatar = file_name,
+            last_update=datetime.now()
+        )
+        content = "註冊完成"
+        return HttpResponse(content, 'text/plain; charset=utf-8')
 
-def check_name(request):
-    # filter(name='Tom').exists()
-    pass
+def check_name(request, name):
+    request.GET.get(name)
+    userName = myMember.objects.filter(user_name=name).exists()
+    if userName:
+        content = "帳號已存在"
+    else:
+        content = "帳號可使用"
 
-def register1(request):
-    user = json.loads(request.body) # 將JSON字串反序列化成dict物件
-    name = user.get('name')
-    email = user.get('email')
-    age = user.get('age')
-    content = f"{name} 您好，電子郵件是 {email}，{age} 歲了. "
-    return HttpResponse(content, 'text/plain')
+    return HttpResponse(content, content_type='text/plain; charset=utf-8')

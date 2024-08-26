@@ -16,6 +16,14 @@
      <input type="email" class="form-control" id="InputEmail" name="email" >    
    </div>
    <div class="mb-3">
+    <label for="InputPassword" class="form-label">密碼</label>
+    <input type="password" class="form-control" id="InputPassword" name="password" >    
+  </div>
+  <div class="mb-3">
+    <label for="InputCheck" class="form-label">確認密碼</label>
+    <input type="password" class="form-control" id="InputCheck" name="checkPassword" >    
+  </div>
+   <div class="mb-3">
      <label for="InputAge" class="form-label">年紀</label>
      <input type="number" class="form-control" id="InputAge" name="age">
    </div>
@@ -24,65 +32,46 @@
     <input class="form-control" type="file" id="formFile" name="avatar">
   </div>
   
-   <button type="submit" class="btn btn-primary" id="buttonSubmit">註冊(FormData)</button>
-   <button type="button" class="btn btn-primary" id="buttonSubmit1">註冊(JSON)</button>
+   <button type="submit" class="btn btn-primary" id="buttonSubmit">送出</button>
+   <div id="massage" class="alert alert-info mt-3"></div>
  </form>
- <div id="div1" class="alert alert-info mt-3"></div>
 {% endblock %}
 {% block scripts %}
 <script>
-   const btnSubmit = document.querySelector('#buttonSubmit')
-   const btnSubmit1 = document.querySelector('#buttonSubmit1')
-   const inpName = document.querySelector('#InputName')
-   const inpEmail = document.querySelector('#InputEmail')
-   const inpAge = document.querySelector('#InputAge')
-   const divInfo= document.querySelector('#div1')
-   const divName = document.querySelector('#nameHelp')
+    const btnSubmit = document.querySelector("#buttonSubmit");
+    const inpName = document.querySelector("#InputName");
+    const inpEmail = document.querySelector("#InputEmail");
+    const inpAge = document.querySelector("#InputAge");
+    const inpPassword = document.querySelector("#Inputpassword");
+    const divInfo = document.querySelector("#massage");
+    const divName = document.querySelector("#nameHelp");
 
-   inpName.addEventListener('blur',()=>{
-    divName.innerHTML = inpName.value
-    //將輸入的姓名傳到api去檢查帳號是否存在
-    //step1 call api fetch('/api/check_name/?name=Tom')
-    //step2 讀取資料
-    //step3 顯示資料
-   })
-
-   btnSubmit.addEventListener('click',async (event)=>{
-      event.preventDefault()
-      //將表單輸入的資料塞進FormData物件中
-      const myForm = document.querySelector('#registerForm')
-      const formData = new FormData(myForm)
-      //透過fetch()將formData資料傳給API
-      const response = await fetch('/api/register/',{
-        method:'POST',
-        body:formData,
-        headers:{
-          'X-CSRFToken':'{{ csrf_token }}'
+    inpName.addEventListener("blur", async () => {
+        const name = inpName.value
+        if (name) {
+            const response = await fetch(`/api/check_name/${name}`);
+            if (response.ok) {
+                const data = await response.text();
+                divName.innerHTML = data;
+            }
         }
-      })
-      const data = await response.text()
-      divInfo.innerHTML = data 
+    });
+    //註冊按鈕，發送formdata
+    btnSubmit.addEventListener("click", async (event) => {
+        event.preventDefault()
+        const myForm = document.querySelector('#registerForm')
+        const formData = new FormData(myForm)
+        const response = await fetch('/api/register/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
 
-
-
-   })
-
-   btnSubmit1.addEventListener('click',async()=>{
-     let user = {"name": inpName.value, "email": inpEmail.value, "age": inpAge.value}
-     user = JSON.stringify(user) //JSON物件轉成字串
-
-     const response = await fetch('/api/register1/',{
-      method:'POST',
-      body:user,
-      headers:{
-        'Content-Type':'application/json',
-        'X-CSRFToken':'{{ csrf_token }}'
-      }
-     })
-
-     const data = await response.text()
-     divInfo.innerHTML = data 
-    
-   })
+        const data = await response.text();
+        divInfo.innerHTML = data
+        myForm.reset()
+    })
 </script>
 {% endblock %}
